@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fighting TBDs — OPEX Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<div class="wrap">
+  <nav class="site-nav"><a href="league.html">League Dashboard →</a></nav>
+
+  <div class="masthead">
+    <div>
+      <div class="league-tag">OPEX · CDM 2026 · 6 TEAMS · NO PLAYOFFS</div>
+      <div class="team-name">Fighting TBDs</div>
+    </div>
+    <div class="refresh-note"><span class="dot"></span>Sample data — refresh manually pre-season
+      <div class="refresh-time">Last refreshed: Aug 14, 2026 · 10:15 AM CT</div>
+    </div>
+  </div>
+
+  <div class="ticker">
+    <details class="stat-card">
+      <summary>
+        <div class="stat-main">
+          <div class="ticker-label">Record</div>
+          <div class="ticker-value">4–8–0</div>
+        </div>
+        <div class="expand-icon">⌄</div>
+      </summary>
+      <div class="ticker-note">2025 final · 2026 not yet drafted</div>
+    </details>
+
+    <details class="stat-card">
+      <summary>
+        <div class="stat-main">
+          <div class="ticker-label">Standing</div>
+          <div class="ticker-value">5 <span style="font-size:20px; color:var(--fog);">/ 6</span></div>
+        </div>
+        <div class="expand-icon">⌄</div>
+      </summary>
+      <div class="ticker-note">Points for: 1,247 season total</div>
+    </details>
+
+    <details class="stat-card">
+      <summary>
+        <div class="stat-main">
+          <div class="ticker-label">Waiver Priority</div>
+          <div class="ticker-value amber">#2</div>
+        </div>
+        <div class="expand-icon">⌄</div>
+      </summary>
+      <div class="ticker-note">Resets weekly, inverse standings · no FAAB</div>
+    </details>
+  </div>
+
+  <div class="row">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">This Week — Wk 11</div>
+        <div class="market-select-wrap">
+          <select id="marketSelect" class="market-select">
+            <option value="DFW">Market: DFW</option>
+            <option value="HOU">Market: Houston</option>
+            <option value="OKC">Market: OKC</option>
+            <option value="WACO">Market: Waco</option>
+          </select>
+        </div>
+      </div>
+      <div class="matchup">
+        <div class="matchup-side">
+          <div class="matchup-team">Fighting TBDs</div>
+          <div class="matchup-score me" id="scoreMe">86.4</div>
+        </div>
+        <div class="matchup-vs loss">FINAL</div>
+        <div class="matchup-side">
+          <div class="matchup-team">Team Cosmic</div>
+          <div class="matchup-score" id="scoreOpp">91.2</div>
+        </div>
+      </div>
+
+      <div class="winprob">
+        <div class="winprob-label">
+          <span>Fighting TBDs <b class="me-pct" id="wpMe">--%</b></span>
+          <span><b class="opp-pct" id="wpOpp">--%</b> Team Cosmic</span>
+        </div>
+        <div class="winprob-bar">
+          <div class="winprob-fill me" id="wpFillMe" style="width:50%"></div>
+          <div class="winprob-fill opp" id="wpFillOpp" style="width:50%"></div>
+        </div>
+        <details>
+          <summary>How this is estimated <span class="expand-icon" style="width:16px;height:16px;font-size:11px;">⌄</span></summary>
+          <div class="ticker-note">
+            Not ESPN's number — our own estimate. Each not-yet-final starter's remaining
+            points are treated as normally distributed around their projection, with spread
+            scaled by position (WR/TE swing more than RB; K/D-ST most volatile). Players are
+            assumed independent. Tune the variance ratios in the page source
+            (<code>POSITION_VARIANCE</code>) as real weeks show whether this runs too wide or too narrow.
+          </div>
+        </details>
+      </div>
+
+      <div class="risk-console-label">Lineup Risk Console</div>
+      <div class="risk-row">
+        <div class="light ok"></div>
+        <div class="risk-player">Josh Jacobs</div>
+        <div class="risk-pos">RB</div>
+        <div class="net-tag" data-player="Josh Jacobs">FOX</div>
+        <div class="risk-status ok">Active</div>
+      </div>
+      <div class="risk-row">
+        <div class="light q"></div>
+        <div class="risk-player">Jaylen Waddle</div>
+        <div class="risk-pos">WR</div>
+        <div class="net-tag none" data-player="Jaylen Waddle">—</div>
+        <div class="risk-status q">Quest.</div>
+      </div>
+      <div class="risk-row">
+        <div class="light bad"></div>
+        <div class="risk-player">Jake Ferguson</div>
+        <div class="risk-pos">TE</div>
+        <div class="net-tag none" data-player="Jake Ferguson">—</div>
+        <div class="risk-status bad">Out</div>
+      </div>
+      <div class="risk-row">
+        <div class="light ok"></div>
+        <div class="risk-player">Justin Jefferson</div>
+        <div class="risk-pos">WR</div>
+        <div class="net-tag" data-player="Justin Jefferson">CBS</div>
+        <div class="risk-status ok">Active</div>
+      </div>
+      <div class="risk-row">
+        <div class="light ok"></div>
+        <div class="risk-player">James Cook</div>
+        <div class="risk-pos">RB</div>
+        <div class="net-tag none" data-player="James Cook">—</div>
+        <div class="risk-status ok">Active</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Season Trend</div>
+        <div class="card-meta">pts for / week</div>
+      </div>
+      <div class="chart-box">
+        <canvas id="trendChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="row" style="grid-template-columns:1fr;">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">League Standings</div>
+        <div class="card-meta">points for, season</div>
+      </div>
+      <div class="leaderboard">
+        <div class="lb-row lb-head">
+          <span>Rk</span><span>Team</span><span>PF</span>
+        </div>
+        <div class="lb-row">
+          <span class="lb-rank">1</span><span class="lb-team">The Kingdom</span><span class="lb-pf">1,410</span>
+        </div>
+        <div class="lb-row">
+          <span class="lb-rank">2</span><span class="lb-team">Neva's Nifty Team</span><span class="lb-pf">1,382</span>
+        </div>
+        <div class="lb-row">
+          <span class="lb-rank">3</span><span class="lb-team">Yogi Baller</span><span class="lb-pf">1,356</span>
+        </div>
+        <div class="lb-row">
+          <span class="lb-rank">4</span><span class="lb-team">Team Cosmic</span><span class="lb-pf">1,301</span>
+        </div>
+        <div class="lb-row me">
+          <span class="lb-rank">5</span><span class="lb-team">Fighting TBDs</span><span class="lb-pf">1,247</span>
+        </div>
+        <div class="lb-row">
+          <span class="lb-rank">6</span><span class="lb-team">Benchwarmers &amp; Brawlers</span><span class="lb-pf">1,190</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row roster-row">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Roster</div>
+        <div class="market-select-wrap">
+          <select id="marketSelect2" class="market-select">
+            <option value="DFW">Market: DFW</option>
+            <option value="HOU">Market: Houston</option>
+            <option value="OKC">Market: OKC</option>
+            <option value="WACO">Market: Waco</option>
+          </select>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr><th>Pos</th><th>Player</th><th>Net</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <tr class="section-row"><td colspan="4">Starters</td></tr>
+          <tr><td><span class="pos-tag">QB</span></td><td>C.J. Stroud</td><td><span class="net-tag" data-player="C.J. Stroud">CBS</span></td><td><span class="status-tag ok">Active</span></td></tr>
+          <tr><td><span class="pos-tag">RB</span></td><td>Josh Jacobs</td><td><span class="net-tag" data-player="Josh Jacobs">FOX</span></td><td><span class="status-tag ok">Active</span></td></tr>
+          <tr><td><span class="pos-tag">RB</span></td><td>James Cook</td><td><span class="net-tag none" data-player="James Cook">—</span></td><td><span class="status-tag ok">Active</span></td></tr>
+          <tr><td><span class="pos-tag">WR</span></td><td>Justin Jefferson</td><td><span class="net-tag" data-player="Justin Jefferson">CBS</span></td><td><span class="status-tag ok">Active</span></td></tr>
+          <tr><td><span class="pos-tag">WR</span></td><td>Jaylen Waddle</td><td><span class="net-tag none" data-player="Jaylen Waddle">—</span></td><td><span class="status-tag q">Quest.</span></td></tr>
+          <tr><td><span class="pos-tag">TE</span></td><td>Jake Ferguson</td><td><span class="net-tag none" data-player="Jake Ferguson">—</span></td><td><span class="status-tag bad">Out</span></td></tr>
+          <tr><td><span class="pos-tag">FLEX</span></td><td>Bucky Irving</td><td><span class="net-tag none" data-player="Bucky Irving">—</span></td><td><span class="status-tag ok">Active</span></td></tr>
+          <tr><td><span class="pos-tag">D/ST</span></td><td>Jaguars</td><td><span class="net-tag none" data-player="Jaguars">—</span></td><td><span class="status-tag ok">Active</span></td></tr>
+          <tr><td><span class="pos-tag">K</span></td><td>Matt Prater</td><td><span class="net-tag none" data-player="Matt Prater">—</span></td><td><span class="status-tag ok">Active</span></td></tr>
+
+          <tr class="section-row"><td colspan="4">Bench</td></tr>
+          <tr><td><span class="pos-tag">QB</span></td><td>Caleb Williams</td><td><span class="net-tag none" data-player="Caleb Williams">—</span></td><td><span class="status-tag ok">Active</span></td></tr>
+          <tr><td><span class="pos-tag">RB</span></td><td>Rachaad White</td><td><span class="net-tag none" data-player="Rachaad White">—</span></td><td><span class="status-tag ok">Active</span></td></tr>
+          <tr><td><span class="pos-tag">WR</span></td><td>DK Metcalf</td><td><span class="net-tag none" data-player="DK Metcalf">—</span></td><td><span class="status-tag ok">Active</span></td></tr>
+          <tr><td><span class="pos-tag">WR</span></td><td>Zay Flowers</td><td><span class="net-tag none" data-player="Zay Flowers">—</span></td><td><span class="status-tag ok">Active</span></td></tr>
+          <tr><td><span class="pos-tag">TE</span></td><td>T.J. Hockenson</td><td><span class="net-tag none" data-player="T.J. Hockenson">—</span></td><td><span class="status-tag ok">Active</span></td></tr>
+          <tr><td><span class="pos-tag">D/ST</span></td><td>Broncos</td><td><span class="net-tag none" data-player="Broncos">—</span></td><td><span class="status-tag ok">Active</span></td></tr>
+
+          <tr class="section-row"><td colspan="4">IR</td></tr>
+          <tr><td><span class="pos-tag">QB</span></td><td>Jayden Daniels</td><td><span class="net-tag none" data-player="Jayden Daniels">—</span></td><td><span class="status-tag ir">IR</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Transaction Wire</div>
+        <div class="card-meta">leaguewide</div>
+      </div>
+      <div class="wire-item">
+        <span class="wire-time">Tue · Wk 11</span>
+        <span class="wire-team">Neva's Nifty</span> <span class="tag-add">added</span> Tyler Warren, <span class="tag-drop">dropped</span> Dallas Goedert
+      </div>
+      <div class="wire-item">
+        <span class="wire-time">Mon · Wk 11</span>
+        <span class="wire-team">Yogi Baller</span> <span class="tag-add">added</span> Keenan Allen
+      </div>
+      <div class="wire-item">
+        <span class="wire-time">Sun · Wk 10</span>
+        <span class="wire-team">Team Cosmic</span> <span class="tag-add">added</span> Ravens D/ST, <span class="tag-drop">dropped</span> Jaguars D/ST
+      </div>
+      <div class="wire-item">
+        <span class="wire-time">Fri · Wk 10</span>
+        <span class="wire-team">The Kingdom</span> <span class="tag-add">added</span> Tucker Kraft
+      </div>
+      <div class="wire-item">
+        <span class="wire-time">Wed · Wk 10</span>
+        <span class="wire-team">Fighting TBDs</span> <span class="tag-add">added</span> Rachaad White, <span class="tag-drop">dropped</span> TreVeyon Henderson
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>Fighting TBDs Console — OPEX/CDM 2026 · manually refreshed</footer>
+
+
+<script src="assets/models.js"></script>
+<script>
+const myStarters = [
+  { pos:'QB',  name:'C.J. Stroud',        pts:18, final:true  },
+  { pos:'RB',  name:'Josh Jacobs',        pts:14, final:true  },
+  { pos:'RB',  name:'James Cook',         pts:13, final:true  },
+  { pos:'WR',  name:'Justin Jefferson',   pts:22, final:true  },
+  { pos:'WR',  name:'Jaylen Waddle',      pts:9,  final:true  },
+  { pos:'TE',  name:'Jake Ferguson',      pts:0,  final:true  }, // Out — locked at 0
+  { pos:'RB',  name:'Bucky Irving',       pts:11, final:true  },
+  { pos:'D/ST',name:'Jaguars',            pts:7,  final:true  },
+  { pos:'K',   name:'Matt Prater',        pts:8,  final:true  },
+];
+
+const oppStarters = [
+  { pos:'QB',  name:'Opp QB',  pts:16, final:true  },
+  { pos:'RB',  name:'Opp RB1', pts:20, final:true  },
+  { pos:'RB',  name:'Opp RB2', pts:14, final:true  },
+  { pos:'WR',  name:'Opp WR1', pts:19, final:true  },
+  { pos:'WR',  name:'Opp WR2', pts:12, final:true  },
+  { pos:'TE',  name:'Opp TE',  pts:9,  final:true  },
+  { pos:'WR',  name:'Opp FLEX',pts:8,  final:true  },
+  { pos:'D/ST',name:'Opp DST', pts:6,  final:true  },
+  { pos:'K',   name:'Opp K',   pts:9,  final:true  },
+];
+
+const wp = winProbability(myStarters, oppStarters);
+const pctMe = Math.round(wp.pA * 100);
+const pctOpp = 100 - pctMe;
+
+document.getElementById('scoreMe').textContent = wp.a.currentScore.toFixed(1);
+document.getElementById('scoreOpp').textContent = wp.b.currentScore.toFixed(1);
+document.getElementById('wpMe').textContent = pctMe + '%';
+document.getElementById('wpOpp').textContent = pctOpp + '%';
+document.getElementById('wpFillMe').style.width = pctMe + '%';
+document.getElementById('wpFillOpp').style.width = pctOpp + '%';
+
+// Page-specific market rendering — wraps the shared applyMarketTags()
+// with this page's two synced dropdowns.
+function renderMarket(market){
+  applyMarketTags(market);
+  document.getElementById('marketSelect').value = market;
+  document.getElementById('marketSelect2').value = market;
+}
+document.getElementById('marketSelect').addEventListener('change', e => renderMarket(e.target.value));
+document.getElementById('marketSelect2').addEventListener('change', e => renderMarket(e.target.value));
+renderMarket('DFW');
+
+new Chart(document.getElementById('trendChart'), {
+  type:'line',
+  data:{
+    labels:weeks,
+    datasets:[
+      {
+        label:'Fighting TBDs',
+        data:myPts,
+        borderColor:'#E3A23C',
+        backgroundColor:'rgba(227,162,60,0.08)',
+        fill:true,
+        tension:0.35,
+        pointRadius:2.5,
+        pointBackgroundColor:'#E3A23C',
+        borderWidth:2.5
+      },
+      {
+        label:'League Avg',
+        data:avgPts,
+        borderColor:'#5A6478',
+        borderDash:[4,3],
+        fill:false,
+        tension:0.35,
+        pointRadius:0,
+        borderWidth:1.5
+      }
+    ]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{
+      legend:{ labels:{ boxWidth:10, boxHeight:10, padding:14, font:{size:13} } }
+    },
+    scales:{
+      x:{ grid:{ color:'#1E2531' }, border:{ color:'#262D3C' } },
+      y:{ grid:{ color:'#1E2531' }, border:{ color:'#262D3C' } }
+    }
+  }
+});
+</script>
+</body>
+</html>
