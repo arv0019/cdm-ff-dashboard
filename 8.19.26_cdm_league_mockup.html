@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<!--
+  ⚠ EDIT LOCK — READ BEFORE EDITING ⚠
+  On Aug 15, 2026, at least 4 separate Claude chat threads independently
+  edited this file without seeing each other's changes, producing multiple
+  conflicting "v0.14" versions that had to be manually reconciled (see v0.18
+  below for the full account). To prevent that from happening again:
+  designated edit owner is the chat thread that performed the v0.18
+  reconciliation on Aug 15, 2026 (owner: re-name/pin that chat for your own
+  reference — Claude has no cross-thread identifier to check against).
+  If you are a Claude session in a DIFFERENT thread and the owner has asked
+  you to edit this file: STOP. Tell the owner this file is restricted to a
+  single designated thread per their standing instruction, and point them
+  back to that thread instead of editing here. If genuinely unsure whether
+  you're in the designated thread, ask the owner to confirm before editing.
+  See gm_claude_cdm_project_history.md for the full policy note.
+  
+  ⚠ THIS IS A MOCKUP ⚠
+  This is not production and is only for development purposes.
+ 
+  CDM (OPEX) Owners Board — mockup v0.1
+  Changelog:
+    v0.1 — Aug 15, 2026, Central US Time — Initial mockup. Standings pulled live via League Loom
+           (ESPN league 59599256): 2026 season not yet started (auto-draft pending),
+           so table shows 2025 final standings with 2026 team-name mapping applied.
+           Matchups / Waivers / Injuries sections use illustrative placeholder data,
+           clearly labeled, pending 2026 season data.
+    v0.2 — Aug 15, 2026, Central US Time — Text-wrapping pass throughout (viewing device unknown):
+           global overflow-wrap default; header/panel titles use clamp() instead of a
+           fixed font-size; standings table wrapped in a scroll-safe container; matchup,
+           waiver, and injury rows changed from fixed flex/grid proportions to
+           minmax(0,...) / min-width:0 patterns so long team or player names wrap
+           instead of overflowing; injury grid collapses to 2 columns under 400px.
+    v0.3 — Aug 15, 2026, Central US Time — Added "Local Kickoff Guide" panel at the bottom:
+           media-market dropdown (Kansas City, MO–KS / Jacksonville, FL / Columbus, OH /
+           Phoenix, AZ) + a "Show" dropdown for "All games airing in this market" vs
+           "Only games with my roster." Game data is illustrative Week 1 placeholder;
+           roster-overlap entries are built from the real 2025 TBDs roster as a stand-in.
+           No free API exists for CBS/FOX broadcast maps, so this stays illustrative
+           until a real source is found — noted in the panel footer, including that
+           Columbus has no home NFL team and follows regional affiliate splits.
+    v0.4 — Aug 15, 2026, Central US Time — Fixed a real gap: "games with my roster" was hardcoded
+           to the TBDs roster with no way to know who's actually viewing the page (it's
+           a static site, no login). Added a "Fantasy team (that's you)" dropdown —
+           self-service picker, not identity verification — and replaced the single
+           hardcoded roster with real 2025 rosters for all 5 returning teams (pulled via
+           League Loom), so overlap is computed live against whichever team the viewer
+           selects. Team Cosmic correctly shows no roster (no 2026 history yet) instead
+           of a fabricated one.
+    v0.5 — Aug 15, 2026, Central US Time — Moved team selection out of the Local Kickoff Guide and
+           into a global "Viewing as" bar at the very top of the page (per-owner
+           identity still not verified — same self-service picker, just relocated).
+           Added a documented JS hook (setViewerTeam / body.dataset.viewerTeam) so
+           future features — highlighting this team's row in Standings, jumping to
+           their Matchup, surfacing their Waiver priority first — can key off the same
+           selection without adding another dropdown. Only the Kickoff Guide reacts to
+           it today.
+    v0.6 — Aug 15, 2026, Central US Time — Connected the highlight: Standings rows, both weeks of
+           Matchups, and Waiver priority rows now carry data-team attributes, and
+           setViewerTeam() toggles a .viewer-highlight class on whatever matches the
+           picker. Replaced the old hardcoded amber "you" styling on the TBDs row —
+           which no longer made sense once any owner can be selected — with a neutral
+           "★ host" tag marking which team's ESPN login actually feeds this page's
+           data, kept separate from the dynamic viewer highlight.
+    v0.7 — Aug 15, 2026, Central US Time — Added network + streaming service to each Local
+           Kickoff Guide row (net-chip + stream-note under the window label). Values
+           follow real broadcast-rights conventions (CBS = AFC away team, FOX = NFC
+           away team, NBC = Sunday Night Football) as an illustrative stand-in — the
+           actual 2026 schedule and TV rights haven't been published yet. Footer note
+           also flags NFL+ as the general out-of-market mobile streaming fallback for
+           any game not airing in the selected market.
+    v0.8 — Aug 15, 2026, Central US Time — Connected media market to the "Viewing as" picker via
+           a teamMarketMap (Kingdom→KC, Benchwarmers→JAX, Nifty→Columbus, Cosmic→
+           Houston, TBDs→DFW, Yogi→Phoenix — Yogi inferred by elimination from the
+           original 4-market list, not explicitly given; flag if wrong). Market select
+           still manually overridable after the default applies. Added Houston, TX and
+           Dallas–Fort Worth, TX as market options; added a Cowboys vs Eagles home-
+           market game for DFW; expanded both national-window games (late doubleheader,
+           SNF) to all 6 markets; SNF now notes it doubles as Houston's home game since
+           the Texans are in it. Enriched all 5 returning teams' rosters with their
+           real DAL/PHI-rostered players (Pickens, Ferguson, Lamb, A.J. Brown, Goedert,
+           Hurts, Aubrey, Eagles D/ST) so the new DFW game gets accurate roster overlap.
+    v0.9 — Aug 15, 2026, Central US Time — Yogi Baller's market confirmed as Phoenix, AZ by the
+           owner. Updated JS comment and panel footer to drop the "inferred, not
+           confirmed" caveat — all 6 team-market mappings are now owner-confirmed.
+    v0.10 — Aug 15, 2026, Central US Time — Added two streaming-exclusive games: Bills vs Jets
+           (Thursday Night Football, Prime Video) and Rams vs Chargers (Netflix
+           showcase game) — both use fresh teams not already in the slate, air in all
+           6 markets (no broadcast-affiliate restriction applies to streaming), and get
+           a distinct violet net-chip/stream-note treatment instead of the usual
+           network + simulcast pairing, since there's no broadcast feed to simulcast.
+           Flagged in the panel footer that Netflix's real NFL rights are Christmas Day
+           games, not Week 1 — included purely to illustrate the streaming-exclusive
+           game type, not as a claim about the actual 2026 schedule.
+    v0.11 — Aug 15, 2026, Central US Time — Wording fix: "no linear TV" → "no broadcast" in both
+           visible stream labels and the panel footer — "linear TV" is the correct
+           industry term but assumes knowledge a general reader may not have.
+    v0.12 — Aug 15, 2026, Central US Time — Games weren't in kickoff order (TNF was listed last
+           even though it airs first). Added kickoff + sortKey to every game and sort
+           by sortKey in renderGames(), so order is guaranteed by data rather than by
+           how the array happens to be typed — safe against future edits. Added a
+           visible game-time chip to each row so the order is self-evident, not just
+           implicit. Reordered the source array to match for readability, though the
+           JS sort is what actually enforces it now.
+    v0.13 — Aug 15, 2026, Central US Time — Times are now linked to the selected market. Replaced
+           the static "Thu 8:15p ET"-style labels + sortKey with a real UTC instant per
+           game (games array now stores utc, a plausible Week 1 2026 kickoff date/time)
+           and a marketTz table mapping each market to its real IANA timezone. A new
+           formatKickoff() uses Intl.DateTimeFormat to convert to local time and sort
+           order at render time — done this way specifically for Phoenix: America/
+           Phoenix never observes DST, so during most of the season Phoenix actually
+           matches Pacific Time, not Mountain, and a hardcoded offset table would have
+           gotten that wrong. The Intl-based approach gets it right automatically,
+           including the November DST changeover. Widened the game-time chip to fit
+           the longer weekday+time+zone-abbreviation label. Footer explains the
+           behavior and calls out the Phoenix case by name.
+  v0.14 — Aug 15, 2026, Central US Time — Added real ESPN numeric team IDs (league 59599256,
+         2026 season, confirmed via League Loom) alongside the existing slug system.
+         New espnTeamId map ties each slug (kingdom/yogi/tbds/nifty/benchwarmers/
+         cosmic) to its ESPN team ID (1/4/5/6/7/8); "Viewing as" options and every
+         data-team element also carry a parallel data-espn-id attribute. Slugs
+         remain the id actually used for rendering/highlight logic — the ESPN IDs
+         are additive, for whenever this page starts pulling live data directly
+         from the ESPN API instead of the current placeholder/illustrative data.
+  v0.15 — Aug 15, 2026, Central US Time — Added a security-boundary comment next to
+         espnTeamId: league_id/team IDs are not credentials and are safe to
+         publish (same sensitivity as team names/home markets already in this
+         file); espn_s2/SWID must never be added here or anywhere in this repo.
+  v0.16 — Aug 15, 2026, Central US Time — Fixed a real bug: at narrow widths (≲400px),
+         .panel had no min-width:0, so its grid item couldn't shrink below its
+         content's intrinsic minimum (table min-width:340px + panel padding/
+         border = 386px). Panels silently overflowed their grid track and got
+         clipped by body{overflow-x:hidden}, cutting off the right edge —
+         the PF/PA stat columns in Standings and similar right-side content in
+         other panels. Added min-width:0 to .panel so it now respects its grid
+         track and the existing .table-scroll overflow-x:auto handles the
+         table's own horizontal scroll as originally intended. Verified via
+         Playwright: scrollWidth now matches windowWidth at 320/375/414px,
+         vs. a 26–41px hidden overflow before the fix.
+  v0.17 — Aug 15, 2026, Central US Time — Fixed a real bug reported via screenshot: on
+         narrow screens, .matchup's flexbox (flex-wrap + justify-content:
+         space-between, both team spans flex-grow:1) could wrap the second
+         team onto its own line while leaving "vs" as the trailing item on
+         the first line — space-between then pushed "vs" to the far right,
+         orphaned from either team (seen with "Neva's Nifty Team vs
+         Benchwarmers & Brawlers"). Converted .matchup to a 3-column grid
+         (minmax(0,1fr) auto minmax(0,1fr)), matching the pattern already
+         used for .inj-row — "vs" now stays pinned in the center column
+         regardless of how either team name wraps. Verified 0px page overflow
+         at 320–1200px after the change.
+         Also addressed rail segment squishing (a side effect of the v0.16
+         min-width:0 fix, which let segments shrink with no floor): rail
+         columns now use minmax(22px,1fr) and .rail is wrapped in a
+         .rail-scroll container (overflow-x:auto, same pattern as
+         .table-scroll) — segments stay legible at a 22px floor and the rail
+         strip itself scrolls horizontally below ~480px instead of the whole
+         page, or the segments, doing so.
+  v0.18 — Aug 15, 2026, 10:48 PM Central US Time — Reconciliation pass:
+         several chat threads had been editing this file in parallel without
+         seeing each other's changes, so their v0.14+ entries diverged
+         instead of stacking. This entry merges them into one coherent
+         history. (1) Merged in the "About This Dashboard" panel — CSS and
+         HTML, collapsed by default via native <details>/<summary> — which
+         had been built and approved in another thread but never actually
+         made it into this file; it now sits above the footer. (2) A
+         separately-built "This Week's Calls" panel (wiring the
+         cdm-weekly-decisions skill's output into this page) was tried in
+         another thread, reverted per owner preference for the prior
+         version, and is intentionally NOT included here. (3) Retrofitted
+         all existing timestamps to the Mon DD, YYYY, HH:MM AM/PM Central US
+         Time format (no CDT/CST abbreviation) — entries before this one
+         were only ever recorded with a date, not a clock time, so no HH:MM
+         is added to them retroactively; this entry is the first with a real
+         time. (4) Fixed the footer version tag, which had been stuck at
+         v0.13 since v0.14 even though the changelog had moved on.
+         Everything else (ESPN team IDs, the security-boundary comment, the
+         two mobile-overflow fixes) was already correctly merged and is
+         unchanged.
+  v0.19 — Aug 15, 2026, 10:52 PM CT — Two standing-instruction updates: (1)
+         "Central US Time" may now be abbreviated "CT" going forward — v0.18
+         and earlier keep their spelled-out wording, no retroactive edit.
+         (2) Added the edit-lock notice at the top of this file restricting
+         future edits to a single designated chat thread, after the v0.18
+         reconciliation revealed 4 threads had been editing this file
+         blind to each other's changes. See the notice itself for what a
+         different-thread Claude session should do if asked to edit here.
+  Next update: pull real Week 1 data once the 2026 auto-draft completes.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CDM Owners Board Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#10151c;
+    --panel:#171e27;
+    --panel-2:#1c2430;
+    --turf:#2f5233;
+    --turf-bright:#5a9a5f;
+    --amber:#e2a63b;
+    --amber-dim:#8a6a2c;
+    --chalk:#edeae0;
+    --slate:#8792a2;
+    --slate-dim:#4d5866;
+    --hair:#262e3a;
+    --red:#c1554a;
+    --violet:#9b86d9;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  *{overflow-wrap:break-word; word-break:normal;}
+  body{
+    background:
+      radial-gradient(ellipse at top left, rgba(47,82,51,0.18), transparent 55%),
+      radial-gradient(ellipse at bottom right, rgba(226,166,59,0.07), transparent 50%),
+      var(--bg);
+    color:var(--chalk);
+    font-family:'Inter', sans-serif;
+    min-height:100vh;
+    padding:clamp(16px,4vw,32px) clamp(12px,4vw,20px) 60px;
+    overflow-x:hidden;
+  }
+  .wrap{max-width:1080px; margin:0 auto; width:100%;}
+ 
+  /* ---------- global viewer bar (team context — hook for future per-team customization) ---------- */
+  .viewer-bar{
+    display:flex; align-items:center; flex-wrap:wrap; gap:10px;
+    background:var(--panel);
+    border:1px solid var(--hair); border-radius:6px;
+    padding:10px 14px; margin-bottom:20px;
+  }
+  .viewer-bar label{
+    font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--slate); flex:0 0 auto;
+  }
+  .viewer-bar select{
+    background:var(--panel-2); color:var(--amber);
+    border:1px solid var(--hair); border-radius:4px; padding:7px 32px 7px 10px;
+    font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:500;
+    appearance:none;
+    background-image:linear-gradient(45deg, transparent 50%, var(--slate) 50%),
+                      linear-gradient(135deg, var(--slate) 50%, transparent 50%);
+    background-position:calc(100% - 18px) center, calc(100% - 13px) center;
+    background-size:5px 5px, 5px 5px;
+    background-repeat:no-repeat;
+    min-width:0; flex:1 1 220px; max-width:280px;
+  }
+  .viewer-bar select:focus{outline:2px solid var(--amber); outline-offset:1px;}
+  .viewer-bar .vb-note{
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--slate-dim);
+    flex:1 1 200px; min-width:0;
+  }
+ 
+  /* ---------- header ---------- */
+  header{
+    display:flex; justify-content:space-between; align-items:flex-end;
+    flex-wrap:wrap; gap:16px;
+    border-bottom:1px solid var(--hair);
+    padding-bottom:20px; margin-bottom:28px;
+  }
+  header > div{min-width:0; max-width:100%;}
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--turf-bright); margin-bottom:6px;
+  }
+  h1{
+    font-family:'Teko', sans-serif; font-weight:600;
+    font-size:clamp(32px,7vw,52px); line-height:1; letter-spacing:.01em;
+    color:var(--chalk);
+  }
+  h1 span{color:var(--amber);}
+  .updated{
+    font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--slate);
+    text-align:right;
+  }
+  .updated strong{color:var(--chalk); display:block; font-size:13px; margin-bottom:2px;}
+  /* on narrow viewports a right-aligned block reads awkward once it drops below the title — left-align instead */
+  @media (max-width:480px){ .updated{text-align:left;} }
+ 
+  /* ---------- grind rail (signature element) ---------- */
+  .rail-section{margin-bottom:36px;}
+  .rail-label{
+    display:flex; justify-content:space-between; align-items:baseline;
+    margin-bottom:10px;
+  }
+  .rail-label .l1{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--slate);}
+  .rail-label .l2{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--amber);}
+  .rail-scroll{width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch;}
+  .rail{
+    display:grid; grid-template-columns:repeat(18,minmax(22px,1fr)); gap:4px;
+  }
+  .rail .seg{
+    height:22px; border-radius:2px; background:var(--panel-2);
+    border:1px solid var(--hair);
+    position:relative;
+  }
+  .rail .seg.kickoff{
+    background:repeating-linear-gradient(45deg, var(--panel-2), var(--panel-2) 4px, var(--hair) 4px, var(--hair) 8px);
+    border-color:var(--amber-dim);
+  }
+  .rail-note{
+    font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--slate-dim);
+    margin-top:8px;
+  }
+ 
+  /* ---------- grid of panels ---------- */
+  .grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:20px;
+  }
+  @media (max-width:760px){ .grid{grid-template-columns:1fr;} }
+ 
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--hair);
+    border-radius:6px;
+    padding:22px 22px 20px;
+    min-width:0; /* grid items default to min-width:auto, which let the panel's
+                    content (table min-width:340px + padding/border = 386px)
+                    silently overflow its track at narrow widths, clipping the
+                    right edge (stat columns) via body{overflow-x:hidden}
+                    instead of letting .table-scroll's overflow-x:auto handle it */
+  }
+  .panel-head{
+    display:flex; justify-content:space-between; align-items:baseline;
+    flex-wrap:wrap; row-gap:6px; column-gap:12px;
+    margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--hair);
+  }
+  .panel-title{
+    font-family:'Teko', sans-serif; font-weight:600; font-size:clamp(20px,4vw,26px);
+    letter-spacing:.01em; text-transform:uppercase; color:var(--chalk);
+  }
+  .panel-tag{
+    font-family:'IBM Plex Mono', monospace; font-size:10px; letter-spacing:.08em;
+    text-transform:uppercase; padding:3px 8px; border-radius:20px;
+    white-space:nowrap;
+  }
+  .tag-live{background:rgba(90,154,95,0.15); color:var(--turf-bright); border:1px solid rgba(90,154,95,0.35);}
+  .tag-mock{background:rgba(226,166,59,0.12); color:var(--amber); border:1px solid rgba(226,166,59,0.3);}
+ 
+  /* standings */
+  .table-scroll{width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch;}
+  table{width:100%; min-width:340px; border-collapse:collapse; font-family:'IBM Plex Mono', monospace; font-size:12.5px;}
+  th{
+    text-align:left; font-weight:500; color:var(--slate);
+    text-transform:uppercase; letter-spacing:.06em; font-size:10px;
+    padding:0 6px 8px; border-bottom:1px solid var(--hair); white-space:nowrap;
+  }
+  td{padding:8px 6px; border-bottom:1px solid var(--hair); color:var(--chalk); vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  .num{text-align:right; color:var(--slate); white-space:nowrap;}
+  .team-cell{font-family:'Inter',sans-serif; font-weight:500; overflow-wrap:break-word;}
+  .you{color:var(--amber);}
+  .host-tag{
+    color:var(--turf-bright); font-size:11px; font-weight:400; margin-left:5px;
+  }
+  .team-cell.viewer-highlight{color:var(--amber); font-weight:600;}
+  .new-tag{
+    font-family:'IBM Plex Mono',monospace; font-size:9px; color:var(--turf-bright);
+    border:1px solid var(--turf); padding:1px 5px; border-radius:10px; margin-left:6px;
+  }
+  .rename{font-size:10px; color:var(--slate-dim); display:block; margin-top:1px;}
+ 
+  /* matchups */
+  .matchup{
+    display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+    align-items:center; column-gap:10px; row-gap:2px;
+    padding:10px 0; border-bottom:1px solid var(--hair); font-size:13px;
+  }
+  .matchup:last-child{border-bottom:none;}
+  .mteam{font-family:'Inter',sans-serif; font-weight:500; min-width:0; overflow-wrap:break-word;}
+  .mteam.viewer-highlight{color:var(--amber); font-weight:600;}
+  .mscore{font-family:'IBM Plex Mono',monospace; color:var(--slate); font-size:12px;}
+  .vs{font-family:'IBM Plex Mono',monospace; color:var(--slate-dim); font-size:10px; white-space:nowrap;}
+ 
+  /* waivers */
+  .wv-sub{
+    font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--slate); margin:14px 0 8px;
+  }
+  .wv-sub:first-child{margin-top:0;}
+  .txn{font-size:12.5px; padding:6px 0; border-bottom:1px solid var(--hair); display:flex; flex-wrap:wrap; justify-content:space-between; gap:4px 10px;}
+  .txn:last-child{border-bottom:none;}
+  .txn > span:first-child{min-width:0; flex:1 1 auto;}
+  .txn .who{color:var(--slate); font-family:'IBM Plex Mono',monospace; font-size:10.5px; flex:0 0 auto;}
+  .add{color:var(--turf-bright);} .drop{color:var(--red);}
+  .prio{display:flex; flex-wrap:wrap; justify-content:space-between; font-family:'IBM Plex Mono',monospace; font-size:12px; padding:5px 0; gap:4px;}
+  .prio.viewer-highlight{color:var(--amber); font-weight:600;}
+  .prio .n{color:var(--amber); width:20px; display:inline-block; flex:0 0 auto;}
+ 
+  /* injuries */
+  .inj-row{
+    display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,.5fr) minmax(0,.7fr) minmax(0,1.6fr);
+    gap:4px 8px; align-items:center; padding:8px 0; border-bottom:1px solid var(--hair); font-size:12.5px;
+  }
+  .inj-row:last-child{border-bottom:none;}
+  .inj-row.head{font-family:'IBM Plex Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--slate);}
+  .flag{font-family:'IBM Plex Mono',monospace; font-weight:500; padding:1px 7px; border-radius:3px; font-size:11px; width:fit-content; white-space:nowrap;}
+  @media (max-width:400px){
+    .inj-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr); row-gap:2px;}
+    .inj-row.head{display:none;}
+    .inj-row .note{grid-column:1 / -1; color:var(--slate);}
+  }
+  .flag.Q{background:rgba(226,166,59,0.15); color:var(--amber);}
+  .flag.D{background:rgba(193,85,74,0.15); color:#e08076;}
+  .flag.O{background:rgba(193,85,74,0.25); color:var(--red);}
+  .note{color:var(--slate);}
+ 
+  .panel-foot{
+    margin-top:14px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--slate-dim);
+  }
+ 
+  /* ---------- local kickoff guide ---------- */
+  .locator{margin-top:20px;}
+  .locator-controls{
+    display:grid; grid-template-columns:1fr 1fr; gap:14px;
+    margin-bottom:18px;
+  }
+  @media (max-width:520px){ .locator-controls{grid-template-columns:1fr;} }
+  .field label{
+    display:block; font-family:'IBM Plex Mono',monospace; font-size:10px;
+    letter-spacing:.08em; text-transform:uppercase; color:var(--slate);
+    margin-bottom:6px;
+  }
+  .field select{
+    width:100%; background:var(--panel-2); color:var(--chalk);
+    border:1px solid var(--hair); border-radius:4px; padding:10px 12px;
+    font-family:'IBM Plex Mono',monospace; font-size:12.5px;
+    appearance:none;
+    background-image:linear-gradient(45deg, transparent 50%, var(--slate) 50%),
+                      linear-gradient(135deg, var(--slate) 50%, transparent 50%);
+    background-position:calc(100% - 18px) center, calc(100% - 13px) center;
+    background-size:5px 5px, 5px 5px;
+    background-repeat:no-repeat;
+  }
+  .field select:focus{outline:2px solid var(--amber); outline-offset:1px;}
+  .game-row{
+    display:flex; flex-wrap:wrap; justify-content:space-between; align-items:baseline;
+    gap:4px 14px; padding:10px 0; border-bottom:1px solid var(--hair); font-size:13px;
+  }
+  .game-row:last-child{border-bottom:none;}
+  .game-time{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--slate);
+    flex:0 0 132px; padding-top:2px;
+  }
+  .game-main{flex:1 1 240px; min-width:0;}
+  .game-matchup{font-family:'Inter',sans-serif; font-weight:500; color:var(--chalk);}
+  .game-broadcast{
+    display:block; margin-top:4px;
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px;
+  }
+  .net-chip{
+    display:inline-block; background:var(--panel-2); color:var(--chalk);
+    border:1px solid var(--hair); border-radius:3px;
+    padding:1px 6px; font-weight:500; margin-right:6px; letter-spacing:.02em;
+  }
+  .net-chip.exclusive{
+    background:rgba(155,134,217,0.15); color:var(--violet);
+    border-color:rgba(155,134,217,0.4);
+  }
+  .stream-note{color:var(--slate);}
+  .stream-note.exclusive{color:var(--violet);}
+  .game-window{
+    display:block; font-family:'IBM Plex Mono',monospace; font-size:10.5px;
+    color:var(--slate); margin-top:2px;
+  }
+  .game-roster{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--turf-bright);
+    flex:1 1 180px; min-width:0; text-align:right;
+  }
+  @media (max-width:520px){ .game-roster{text-align:left;} }
+  .locator-empty{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--slate);
+    padding:14px 0;
+  }
+ 
+  /* ---------- about this dashboard (collapsible) ---------- */
+  .about-panel{
+    background:var(--panel);
+    border:1px solid var(--hair);
+    border-radius:6px;
+    margin-top:20px;
+  }
+  .about-panel summary{
+    list-style:none; cursor:pointer;
+    padding:16px 22px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    font-family:'Teko', sans-serif; font-weight:600; font-size:18px;
+    letter-spacing:.01em; text-transform:uppercase; color:var(--chalk);
+  }
+  .about-panel summary::-webkit-details-marker{display:none;}
+  .about-panel summary::after{
+    content:'+'; font-family:'IBM Plex Mono', monospace; font-weight:400;
+    font-size:16px; color:var(--slate); flex:0 0 auto;
+  }
+  .about-panel[open] summary::after{content:'–';}
+  .about-panel summary:hover{color:var(--amber);}
+  .about-body{
+    padding:0 22px 20px; font-size:13px; line-height:1.6; color:var(--chalk);
+    border-top:1px solid var(--hair); padding-top:14px;
+  }
+  .about-body p{margin-bottom:10px;}
+  .about-body p:last-child{margin-bottom:0;}
+  .about-body strong{color:var(--chalk); font-weight:600;}
+ 
+  footer{
+    margin-top:40px; padding-top:16px; border-top:1px solid var(--hair);
+    font-family:'IBM Plex Mono', monospace; font-size:10.5px; color:var(--slate-dim);
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;
+  }
+  footer span{min-width:0; flex:1 1 260px;}
+  footer span:last-child{text-align:right;}
+  @media (max-width:480px){ footer span:last-child{text-align:left;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+ 
+  <div class="viewer-bar">
+    <label for="global-team-select">Viewing as</label>
+    <select id="global-team-select">
+      <option value="tbds" data-espn-id="5">The Fighting TBDs</option>
+      <option value="kingdom" data-espn-id="1">The Kingdom</option>
+      <option value="yogi" data-espn-id="4">Yogi Baller</option>
+      <option value="nifty" data-espn-id="6">Neva's Nifty Team</option>
+      <option value="benchwarmers" data-espn-id="7">Benchwarmers &amp; Brawlers</option>
+      <option value="cosmic" data-espn-id="8">Team Cosmic</option>
+    </select>
+    <span class="vb-note">Self-service picker, not a login — sets your default media market below and highlights this team's row in Standings/Matchups/Waivers. Future per-team views can hook in the same way.</span>
+  </div>
+ 
+  <header>
+    <div>
+      <div class="eyebrow">6 Teams · No Playoffs · Head-to-Head PPR</div>
+      <h1>CDM <span>·</span> OPEX Owners Board</h1>
+    </div>
+    <div class="updated">
+      <strong>Preseason — 2026</strong>
+      Last data pull: Aug 15, 2026, 10:48 PM Central US Time<br>
+      Draft: autopick, not yet run
+    </div>
+  </header>
+ 
+  <div class="rail-section">
+    <div class="rail-label">
+      <span class="l1">18-week grind — every week counts the same, no bracket</span>
+      <span class="l2">WEEK — / 18</span>
+    </div>
+    <div class="rail-scroll"><div class="rail" id="rail"></div></div>
+    <div class="rail-note">No playoffs this league — final standings after Week 18 are the whole story. Rail fills in as weeks complete.</div>
+  </div>
+ 
+  <div class="grid">
+ 
+    <!-- STANDINGS -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Standings</div>
+        <div class="panel-tag tag-live">Live pull · 2025 final</div>
+      </div>
+      <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>#</th><th>Team</th><th class="num">W-L</th><th class="num">PF</th><th class="num">PA</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td class="team-cell" data-team="kingdom" data-espn-id="1">The Kingdom</td><td class="num">7-5</td><td class="num">1607.1</td><td class="num">1459.4</td></tr>
+          <tr><td>2</td><td class="team-cell" data-team="nifty" data-espn-id="6">Neva's Nifty Team</td><td class="num">7-5</td><td class="num">1603.7</td><td class="num">1486.4</td></tr>
+          <tr><td>3</td><td class="team-cell" data-team="yogi" data-espn-id="4">Yogi Baller</td><td class="num">7-5</td><td class="num">1572.2</td><td class="num">1589.2</td></tr>
+          <tr><td>4</td><td class="team-cell" data-team="benchwarmers" data-espn-id="7">Benchwarmers &amp; Brawlers<span class="rename">formerly Joneen's Scary Team</span></td><td class="num">5-7</td><td class="num">1625.1</td><td class="num">1703.6</td></tr>
+          <tr><td>5</td><td class="team-cell" data-team="tbds" data-espn-id="5">The Fighting TBDs<span class="host-tag" title="ESPN account used to pull this page's data">★ host</span></td><td class="num">4-8</td><td class="num">1451.9</td><td class="num">1621.2</td></tr>
+          <tr><td>—</td><td class="team-cell" data-team="cosmic" data-espn-id="8">Team Cosmic<span class="new-tag">NEW 2026</span></td><td class="num">—</td><td class="num">—</td><td class="num">—</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="panel-foot">2026 season hasn't started (auto-draft pending) — rows show 2025 final results, 2026 team names applied. Will flip to live 2026 records after Week 1.</div>
+    </div>
+ 
+    <!-- MATCHUPS -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Matchups</div>
+        <div class="panel-tag tag-mock">Illustrative — Week 1 preview</div>
+      </div>
+      <div class="wv-sub">This week</div>
+      <div class="matchup"><span class="mteam" data-team="tbds" data-espn-id="5">The Fighting TBDs</span><span class="vs">vs</span><span class="mteam" data-team="cosmic" data-espn-id="8">Team Cosmic</span></div>
+      <div class="matchup"><span class="mteam" data-team="kingdom" data-espn-id="1">The Kingdom</span><span class="vs">vs</span><span class="mteam" data-team="yogi" data-espn-id="4">Yogi Baller</span></div>
+      <div class="matchup"><span class="mteam" data-team="nifty" data-espn-id="6">Neva's Nifty Team</span><span class="vs">vs</span><span class="mteam" data-team="benchwarmers" data-espn-id="7">Benchwarmers &amp; Brawlers</span></div>
+      <div class="wv-sub">Next week</div>
+      <div class="matchup"><span class="mteam" data-team="tbds" data-espn-id="5">The Fighting TBDs</span><span class="vs">vs</span><span class="mteam" data-team="kingdom" data-espn-id="1">The Kingdom</span></div>
+      <div class="matchup"><span class="mteam" data-team="yogi" data-espn-id="4">Yogi Baller</span><span class="vs">vs</span><span class="mteam" data-team="nifty" data-espn-id="6">Neva's Nifty Team</span></div>
+      <div class="matchup"><span class="mteam" data-team="cosmic" data-espn-id="8">Team Cosmic</span><span class="vs">vs</span><span class="mteam" data-team="benchwarmers" data-espn-id="7">Benchwarmers &amp; Brawlers</span></div>
+      <div class="panel-foot">Real schedule + live scores populate once the 2026 draft runs and Week 1 locks.</div>
+    </div>
+ 
+    <!-- WAIVERS -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Waivers</div>
+        <div class="panel-tag tag-mock">Illustrative sample</div>
+      </div>
+      <div class="wv-sub">Recent moves</div>
+      <div class="txn"><span><span class="add">+ add</span> — RB, Backfield Name</span><span class="who">TBDs</span></div>
+      <div class="txn"><span><span class="drop">− drop</span> — K, Bench Kicker</span><span class="who">Yogi Baller</span></div>
+      <div class="txn"><span><span class="add">+ add</span> — D/ST, Matchup Stream</span><span class="who">Nifty Team</span></div>
+      <div class="wv-sub">Priority order — resets weekly (inverse standings)</div>
+      <div class="prio" data-team="cosmic" data-espn-id="8"><span><span class="n">1</span>Team Cosmic</span></div>
+      <div class="prio" data-team="tbds" data-espn-id="5"><span><span class="n">2</span>The Fighting TBDs</span></div>
+      <div class="prio" data-team="benchwarmers" data-espn-id="7"><span><span class="n">3</span>Benchwarmers &amp; Brawlers</span></div>
+      <div class="prio" data-team="yogi" data-espn-id="4"><span><span class="n">4</span>Yogi Baller</span></div>
+      <div class="prio" data-team="nifty" data-espn-id="6"><span><span class="n">5</span>Neva's Nifty Team</span></div>
+      <div class="prio" data-team="kingdom" data-espn-id="1"><span><span class="n">6</span>The Kingdom</span></div>
+      <div class="panel-foot">No FAAB in this league — priority timing is the whole game. Real order + transaction log populate weekly once the season starts.</div>
+    </div>
+ 
+    <!-- INJURIES -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Injuries</div>
+        <div class="panel-tag tag-mock">Illustrative sample</div>
+      </div>
+      <div class="inj-row head"><span>Player</span><span>Pos</span><span>Flag</span><span>Note</span></div>
+      <div class="inj-row"><span>Sample Player A</span><span>RB</span><span class="flag Q">Q</span><span class="note">Game-time decision — monitor Fri report</span></div>
+      <div class="inj-row"><span>Sample Player B</span><span>WR</span><span class="flag D">D</span><span class="note">Backup role likely locks in</span></div>
+      <div class="inj-row"><span>Sample Player C</span><span>TE</span><span class="flag O">O</span><span class="note">Confirmed out — check waiver replacement</span></div>
+      <div class="panel-foot">Lineup protection is OFF this league — an unmanaged Q/D/O costs points outright. Real leaguewide flags populate here once rosters are live.</div>
+    </div>
+ 
+  </div>
+ 
+  <!-- LOCAL KICKOFF GUIDE -->
+  <div class="panel locator">
+    <div class="panel-head">
+      <div class="panel-title">Local Kickoff Guide</div>
+      <div class="panel-tag tag-mock">Illustrative — Week 1</div>
+    </div>
+ 
+    <div class="locator-controls">
+      <div class="field">
+        <label for="market-select">Media market</label>
+        <select id="market-select">
+          <option value="kc">Kansas City, MO–KS</option>
+          <option value="jax">Jacksonville, FL</option>
+          <option value="cmh">Columbus, OH</option>
+          <option value="phx">Phoenix, AZ</option>
+          <option value="hou">Houston, TX</option>
+          <option value="dfw">Dallas–Fort Worth, TX</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="mode-select">Show</label>
+        <select id="mode-select">
+          <option value="all">All games airing in this market</option>
+          <option value="roster">Only games with my roster</option>
+        </select>
+      </div>
+    </div>
+ 
+    <div id="game-list"></div>
+    <div class="panel-foot">Kickoff times are converted to whichever market is selected, using each market's real IANA timezone rather than a hardcoded ET/CT/MT offset table — necessary because Phoenix is a genuine edge case: Arizona doesn't observe daylight saving time, so for most of the NFL season (roughly mid-March–early November) Phoenix's clock actually matches Pacific Time, one hour off from Denver/Mountain despite usually getting grouped with it. Switch markets on the same game to see the times shift correctly. Games are sorted by real kickoff order (Thu night → Sun early → Sun late → SNF), not by the order they're defined in code. Media market defaults to the team picked at the top (Kingdom→KC, Benchwarmers→JAX, Nifty→Columbus, Cosmic→Houston, TBDs→DFW, Yogi→Phoenix — all 6 confirmed) — change it manually to check a different one. Broadcast maps (CBS/FOX doubleheader and home-market rules), network/streaming assignments, and kickoff times aren't available via a free API — the 2026 schedule and TV rights haven't even been published yet — so the game list shown here is illustrative, built on real broadcast-rights conventions (CBS = AFC away team, FOX = NFC away team, NBC = Sunday Night Football) and a plausible Week 1 date (Sept 10–13, 2026) as a stand-in. The two violet-tagged games are streaming-exclusive (no broadcast feed at all) and, like all national windows, air in every market since there's no local-affiliate restriction. One accuracy note: Netflix's actual NFL rights are Christmas Day games, not a Week 1 fixture — it's included here only to illustrate that this panel can represent a streaming-exclusive game, not as a real prediction of the 2026 schedule. Any non-exclusive game not in your market can usually still be streamed via NFL+ on mobile. Roster overlap is real 2025 data (2026 rosters don't exist yet — draft pending) mapped against each game's NFL teams. Columbus, OH has no home NFL team, so its early window typically follows regional CBS/FOX affiliate splits rather than a single local team. Team Cosmic has no roster history yet.</div>
+  </div>
+ 
+  <details class="about-panel">
+    <summary>About This Dashboard</summary>
+    <div class="about-body">
+      <p>This is a personal side project to explore what AI tools can do with fantasy football decisions. It draws on both public and private data.</p>
+      <p>Public data (e.g., player stats, injuries, Vegas lines, weather, coaches' tendencies) is the same information any fantasy site uses.</p>
+      <p>League-specific data includes my own roster and transactions, plus league-wide standings, scores, and other owners' rosters and transaction history. This data is used to spot league-wide patterns like waiver competition. It is not used to build behavior profiles on individual owners. All of these metrics are available to every owner in the league through ESPN or I can provide them to you. If you would like to exclude your team from league-wide analysis, let me know.</p>
+      <p>This project does not use login credentials, automate trades or waivers, or leave this league. This project is for my learning purposes only, not for commercial or gambling purposes. This project is not affiliated with ESPN, Anthropic, the NFL, or any other organization.</p>
+    </div>
+  </details>
+ 
+  <footer>
+    <span>CDM 2026 · 6 owners · Data via League Loom (ESPN) + manual Vegas/weather/injury pass</span>
+    <span>v0.19 · Aug 15, 2026, 10:52 PM CT · mockup — no live 2026 data yet</span>
+  </footer>
+ 
+</div>
+ 
+<script>
+  // Grind rail: 18 segments, preseason state = all empty with a marked kickoff segment
+  const rail = document.getElementById('rail');
+  for (let i = 1; i <= 18; i++) {
+    const seg = document.createElement('div');
+    seg.className = 'seg' + (i === 1 ? ' kickoff' : '');
+    seg.title = 'Week ' + i;
+    rail.appendChild(seg);
+  }
+ 
+  // Local Kickoff Guide — illustrative Week 1 game slate (no free broadcast-map API
+  // exists, and the real 2026 schedule/TV assignments aren't out yet). Roster data
+  // below is real: pulled via League Loom from the 2025 season (2026 rosters don't
+  // exist yet — draft pending), keyed by each returning team. "teams" on a game =
+  // the two NFL teams playing; roster overlap is computed live against whichever
+  // fantasy team the viewer picks, not hardcoded to one team.
+  //
+  // network/stream follow real broadcast-rights conventions as a stand-in (CBS
+  // carries AFC-away games, FOX carries NFC-away games, NBC has Sunday Night
+  // Football) — not the actual 2026 assignments, which ESPN/networks haven't
+  // published yet.
+  //
+  // Each game's "utc" is the real kickoff instant (Thu Sept 10 / Sun Sept 13, 2026,
+  // ET times converted to UTC). Display time is computed per-market at render time
+  // via Intl.DateTimeFormat against a real IANA timezone — NOT a hardcoded ET/CT/MT
+  // offset table. That matters specifically for Phoenix: Arizona never observes
+  // daylight saving time, so during the DST portion of the season (roughly
+  // mid-March – early November, which covers Week 1) Phoenix's clock actually
+  // matches Pacific Time, one hour off from Denver/Mountain despite both usually
+  // getting lumped together as "Mountain Time." Using America/Phoenix as the
+  // timezone identifier makes the browser get this right automatically, for any
+  // date — including the Nov DST changeover, when Phoenix's relationship to the
+  // other zones flips back to matching Mountain Standard Time.
+  const marketTz = {
+    kc: 'America/Chicago',
+    jax: 'America/New_York',
+    cmh: 'America/New_York',
+    phx: 'America/Phoenix', // fixed UTC-7 year-round, no DST — the flagged edge case
+    hou: 'America/Chicago',
+    dfw: 'America/Chicago'
+  };
+ 
+  function formatKickoff(utcIso, tz) {
+    return new Intl.DateTimeFormat('en-US', {
+      timeZone: tz, weekday: 'short', hour: 'numeric', minute: '2-digit', timeZoneName: 'short'
+    }).format(new Date(utcIso));
+  }
+ 
+  const games = [
+    { matchup: 'Bills vs Jets', utc: '2026-09-11T00:15:00Z', window: 'Thursday Night Football · national', markets: ['kc', 'jax', 'cmh', 'phx', 'hou', 'dfw'], teams: ['BUF', 'NYJ'], network: 'Prime Video', stream: 'No broadcast — Amazon subscription only', exclusive: true },
+    { matchup: 'Chiefs vs Broncos', utc: '2026-09-13T17:00:00Z', window: 'Early window · home market', markets: ['kc'], teams: ['KC', 'DEN'], network: 'CBS', stream: 'Paramount+' },
+    { matchup: 'Jaguars vs Titans', utc: '2026-09-13T17:00:00Z', window: 'Early window · home market', markets: ['jax'], teams: ['JAX', 'TEN'], network: 'CBS', stream: 'Paramount+' },
+    { matchup: 'Cardinals vs 49ers', utc: '2026-09-13T17:00:00Z', window: 'Early window · home market', markets: ['phx'], teams: ['ARI', 'SF'], network: 'FOX', stream: 'Tubi' },
+    { matchup: 'Browns vs Bengals', utc: '2026-09-13T17:00:00Z', window: 'Early window · regional CBS/FOX split', markets: ['cmh'], teams: ['CLE', 'CIN'], network: 'CBS', stream: 'Paramount+' },
+    { matchup: 'Cowboys vs Eagles', utc: '2026-09-13T17:00:00Z', window: 'Early window · home market', markets: ['dfw'], teams: ['DAL', 'PHI'], network: 'FOX', stream: 'Tubi' },
+    { matchup: 'Vikings vs Packers', utc: '2026-09-13T20:25:00Z', window: 'Late window · national doubleheader', markets: ['kc', 'jax', 'cmh', 'phx', 'hou', 'dfw'], teams: ['MIN', 'GB'], network: 'FOX', stream: 'Tubi' },
+    { matchup: 'Rams vs Chargers', utc: '2026-09-13T20:25:00Z', window: 'Netflix showcase game · national', markets: ['kc', 'jax', 'cmh', 'phx', 'hou', 'dfw'], teams: ['LAR', 'LAC'], network: 'Netflix', stream: 'No broadcast — Netflix subscription only', exclusive: true },
+    { matchup: 'Texans vs Ravens', utc: '2026-09-14T00:20:00Z', window: 'Sunday Night Football · national (also HOU home market)', markets: ['kc', 'jax', 'cmh', 'phx', 'hou', 'dfw'], teams: ['HOU', 'BAL'], network: 'NBC', stream: 'Peacock' }
+  ];
+ 
+  const rosters = {
+    kingdom: [
+      { name: 'Christian McCaffrey', nfl: 'SF' }, { name: 'Lamar Jackson', nfl: 'BAL' },
+      { name: 'George Kittle', nfl: 'SF' }, { name: 'Courtland Sutton', nfl: 'DEN' },
+      { name: 'Rashee Rice', nfl: 'KC' }, { name: 'Broncos D/ST', nfl: 'DEN' },
+      { name: 'Trevor Lawrence', nfl: 'JAX' }, { name: 'George Pickens', nfl: 'DAL' }
+    ],
+    yogi: [
+      { name: 'Derrick Henry', nfl: 'BAL' }, { name: 'Tee Higgins', nfl: 'CIN' },
+      { name: 'James Conner', nfl: 'ARI' }, { name: 'Patrick Mahomes', nfl: 'KC' },
+      { name: 'Travis Kelce', nfl: 'KC' }, { name: 'Travis Etienne Jr.', nfl: 'JAX' },
+      { name: 'Jalen Hurts', nfl: 'PHI' }, { name: 'Eagles D/ST', nfl: 'PHI' },
+      { name: 'Brandon Aubrey', nfl: 'DAL' }
+    ],
+    tbds: [
+      { name: 'Justin Jefferson', nfl: 'MIN' }, { name: 'Nico Collins', nfl: 'HOU' },
+      { name: 'Josh Jacobs', nfl: 'GB' }, { name: 'Zay Flowers', nfl: 'BAL' },
+      { name: 'T.J. Hockenson', nfl: 'MIN' }, { name: 'C.J. Stroud', nfl: 'HOU' },
+      { name: 'Jaguars D/ST', nfl: 'JAX' }, { name: 'Jake Ferguson', nfl: 'DAL' }
+    ],
+    nifty: [
+      { name: "Ja'Marr Chase", nfl: 'CIN' }, { name: 'Trey McBride', nfl: 'ARI' },
+      { name: 'Joe Burrow', nfl: 'CIN' }, { name: 'Browns D/ST', nfl: 'CLE' },
+      { name: 'Tyler Loop', nfl: 'BAL' }, { name: 'Texans D/ST', nfl: 'HOU' },
+      { name: 'Dallas Goedert', nfl: 'PHI' }
+    ],
+    benchwarmers: [
+      { name: 'Chase Brown', nfl: 'CIN' }, { name: 'Marvin Harrison Jr.', nfl: 'ARI' },
+      { name: 'Calvin Ridley', nfl: 'TEN' }, { name: 'David Montgomery', nfl: 'HOU' },
+      { name: 'Aaron Jones Sr.', nfl: 'MIN' }, { name: 'CeeDee Lamb', nfl: 'DAL' },
+      { name: 'A.J. Brown', nfl: 'PHI' }
+    ],
+    cosmic: [] // new for 2026, no roster history to pull from
+  };
+ 
+  const marketSelect = document.getElementById('market-select');
+  const globalTeamSelect = document.getElementById('global-team-select');
+  const modeSelect = document.getElementById('mode-select');
+  const gameList = document.getElementById('game-list');
+ 
+  // Central hook: anything on the page that should react to "who's viewing" reads
+  // document.body.dataset.viewerTeam (or just calls this again after it changes).
+  // Currently drives: Local Kickoff Guide roster overlap, and a highlight on this
+  // team's row in Standings / Matchups / Waiver priority (any element carrying a
+  // matching data-team attribute). Add data-team to a new element to pull it in.
+  // Real ESPN team IDs, league 59599256 (CDM 2026), confirmed via League Loom.
+  // Additive alongside the slug system above — slugs still drive rendering/
+  // highlight logic; this map is here for when the page pulls live ESPN data.
+  //
+  // Security note: league_id and these numeric team IDs are NOT credentials —
+  // they're just row identifiers, same sensitivity as the team names/home
+  // markets already published in this file. Safe to keep in this repo.
+  // NEVER add espn_s2 / SWID (or any other auth cookie/token) to this file or
+  // any other file in this repo — those are what actually grant access to the
+  // private league and must stay server-side / off GitHub entirely. Any future
+  // live-data pull should fetch with those credentials in a separate process
+  // and publish only the resulting JSON/HTML output here.
+  const espnTeamId = {
+    kingdom: 1,
+    yogi: 4,
+    tbds: 5,      // ★ host — ESPN account this page's data is pulled from
+    nifty: 6,
+    benchwarmers: 7,
+    cosmic: 8
+  };
+ 
+  // Owner-provided home markets (all 6 confirmed).
+  const teamMarketMap = {
+    kingdom: 'kc',
+    benchwarmers: 'jax',
+    nifty: 'cmh',
+    cosmic: 'hou',
+    tbds: 'dfw',
+    yogi: 'phx'
+  };
+ 
+  function setViewerTeam(teamId) {
+    document.body.dataset.viewerTeam = teamId;
+    document.querySelectorAll('[data-team]').forEach(el => {
+      el.classList.toggle('viewer-highlight', el.dataset.team === teamId);
+    });
+    // Default the media market to this team's home market. Still manually
+    // overridable afterward — only resets when the team picker itself changes.
+    if (teamMarketMap[teamId]) marketSelect.value = teamMarketMap[teamId];
+    renderGames();
+  }
+ 
+  function renderGames() {
+    const market = marketSelect.value;
+    const mode = modeSelect.value;
+    const myRoster = rosters[globalTeamSelect.value] || [];
+ 
+    let rows = games
+      .filter(g => g.markets.includes(market))
+      .map(g => {
+        const hits = myRoster.filter(p => g.teams.includes(p.nfl));
+        return { game: g, hits };
+      })
+      .sort((a, b) => new Date(a.game.utc) - new Date(b.game.utc)); // real kickoff order, not source-array order
+ 
+    if (mode === 'roster') rows = rows.filter(r => r.hits.length > 0);
+ 
+    gameList.innerHTML = '';
+    if (rows.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'locator-empty';
+      empty.textContent = (globalTeamSelect.value === 'cosmic')
+        ? 'Team Cosmic has no 2026 roster yet — check back once the draft runs.'
+        : 'No games with your roster are airing in this market this week.';
+      gameList.appendChild(empty);
+      return;
+    }
+    rows.forEach(r => {
+      const row = document.createElement('div');
+      row.className = 'game-row';
+      const rosterNote = r.hits.length
+        ? '<span class="game-roster">' + r.hits.map(p => p.name).join(', ') + '</span>'
+        : '';
+      const excl = r.game.exclusive ? ' exclusive' : '';
+      const localTime = formatKickoff(r.game.utc, marketTz[market]);
+      row.innerHTML =
+        '<span class="game-time">' + localTime + '</span>' +
+        '<div class="game-main">' +
+          '<span class="game-matchup">' + r.game.matchup + '</span>' +
+          '<span class="game-window">' + r.game.window + '</span>' +
+          '<span class="game-broadcast"><span class="net-chip' + excl + '">' + r.game.network + '</span><span class="stream-note' + excl + '">' + r.game.stream + '</span></span>' +
+        '</div>' + rosterNote;
+      gameList.appendChild(row);
+    });
+  }
+ 
+  marketSelect.addEventListener('change', renderGames);
+  globalTeamSelect.addEventListener('change', () => setViewerTeam(globalTeamSelect.value));
+  modeSelect.addEventListener('change', renderGames);
+  setViewerTeam(globalTeamSelect.value);
+</script>
+ 
+</body>
+</html>
+ 
